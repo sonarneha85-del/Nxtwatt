@@ -1,0 +1,708 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NXTWATT | Shared EV Charging</title>
+
+<style>
+:root{--bg:#07111f;--panel:#101f32;--panel2:#152941;--text:#f4f8ff;--muted:#a9bbd0;--line:#2b4058;--green:#8cf0b5;--lime:#d2ff83;--blue:#7bd0ff}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(ellipse at 80% 0%,#163958 0,transparent 35%),var(--bg);color:var(--text);font:16px/1.6 Inter,system-ui,Segoe UI,Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0;border-radius:12px;padding:11px 16px;font-weight:800;transition:.2s}
+button:hover{transform:translateY(-1px)}
+button:disabled{opacity:.6;cursor:wait;transform:none}
+.primary{background:var(--green);color:#092016}
+.secondary{background:#1c3047;color:var(--text);border:1px solid var(--line)}
+.nav{position:sticky;top:0;z-index:10;background:#07111fee;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav-inner{max-width:1150px;margin:auto;padding:13px 22px;display:flex;align-items:center;justify-content:space-between;gap:15px}
+.brand{font-size:21px;font-weight:950;letter-spacing:1px;display:flex;align-items:center;gap:10px}
+.logo{display:grid;place-items:center;width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--green),var(--lime));color:#061a14}
+.links{display:flex;gap:5px;flex-wrap:wrap}
+.links a{color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:9px;font-size:13px}
+.links a:hover{background:#172a40;color:white}
+.wrap{max-width:1150px;margin:auto;padding:35px 22px 70px}
+.hero{display:grid;grid-template-columns:1.1fr .9fr;align-items:center;gap:35px;padding:48px 0}
+.eyebrow{color:var(--green);font-size:12px;letter-spacing:2px;font-weight:900;text-transform:uppercase}
+.hero h1{font-size:clamp(40px,6vw,68px);line-height:1.02;letter-spacing:-2px;margin:15px 0}
+.hero h1 span{color:var(--green)}
+.lead{font-size:18px;color:var(--muted);max-width:620px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.card,.hero-card{background:linear-gradient(145deg,#14263b,#0d1929);border:1px solid var(--line);border-radius:20px;padding:21px;box-shadow:0 15px 45px #0002}
+.hero-card{padding:28px}
+.hero-icon{font-size:65px}
+.section{margin-top:38px}
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:18px}
+.section h2,.page-title{font-size:clamp(27px,4vw,38px);line-height:1.12;letter-spacing:-.8px;margin:5px 0 10px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.stat .number{font-size:30px;font-weight:950}
+.stat .label{font-size:13px;color:var(--muted)}
+.tag{display:inline-block;background:#173c34;color:var(--green);padding:5px 9px;border-radius:99px;font-size:12px;font-weight:800}
+.charger{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.charger h3{margin:0;font-size:19px}
+.details{display:flex;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:13px}
+.price{font-size:24px;font-weight:900}
+.price span{font-size:12px;color:var(--muted);font-weight:500}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:13px}
+.field label{font-size:13px;color:var(--muted);font-weight:750}
+.field input,.field select{width:100%;background:#091625;color:white;border:1px solid #2b425c;border-radius:11px;padding:11px 12px;outline:none}
+.field input:focus,.field select:focus{border-color:var(--green)}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;margin:20px 0}
+.notice{padding:12px 14px;border:1px solid #2b4b44;background:#102c28;color:#c9f9dd;border-radius:12px;font-size:13px}
+.bar{height:10px;background:#24394e;border-radius:99px;overflow:hidden}
+.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--lime));border-radius:99px}
+.agent{border-left:3px solid var(--green)}
+.agent-icon{font-size:29px}
+.hidden{display:none!important}
+.footer{border-top:1px solid var(--line);padding:25px 22px;color:var(--muted);font-size:13px}
+.footer-inner{max-width:1150px;margin:auto;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.toast{position:fixed;bottom:20px;right:20px;background:#e2ffeb;color:#092016;padding:13px 17px;border-radius:12px;display:none;z-index:10000;font-weight:800;box-shadow:0 10px 35px #0005}
+.toast.show{display:block}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:30px}
+.result{margin-top:12px}
+#bookingModal input,#bookingModal select{background:#091625;color:white;border:1px solid #30445b;border-radius:9px}
+#bookingModal label{display:block;color:var(--muted);font-size:13px;font-weight:750}
+
+/* NXTWATT AI CHATBOT STYLES */
+#nxtwatt-chat-button{
+ position:fixed;right:22px;bottom:22px;z-index:9000;
+ background:linear-gradient(135deg,var(--green),var(--lime));
+ color:#092016;border:1px solid #a6f5c5;border-radius:30px;
+ padding:13px 19px;font-size:14px;font-weight:900;
+ box-shadow:0 8px 28px #0005;
+}
+#nxtwatt-chat-window{
+ display:none;position:fixed;right:22px;bottom:86px;
+ width:min(370px,calc(100vw - 28px));
+ height:min(490px,calc(100vh - 115px));
+ z-index:9000;background:#101f32;color:var(--text);
+ border:1px solid #38536c;border-radius:18px;
+ box-shadow:0 15px 50px #0008;overflow:hidden;
+ flex-direction:column;
+}
+#nxtwatt-chat-window.open{display:flex}
+#nxtwatt-chat-header{
+ display:flex;align-items:center;justify-content:space-between;
+ gap:10px;padding:15px 16px;
+ background:linear-gradient(135deg,#173c34,#14263b);
+ border-bottom:1px solid var(--line);
+}
+#nxtwatt-chat-header strong{font-size:16px}
+#nxtwatt-chat-header .chat-subtitle{font-size:11px;color:#c0d8cb}
+#nxtwatt-chat-close{
+ background:transparent;color:white;border:1px solid #496253;
+ padding:3px 10px;font-size:22px;border-radius:9px;
+}
+#nxtwatt-chat-messages{
+ flex:1;min-height:0;overflow-y:auto;padding:14px;
+ background:#0a1726;
+}
+.nxtwatt-message{
+ padding:10px 12px;margin-bottom:11px;border-radius:13px;
+ max-width:90%;overflow-wrap:anywhere;white-space:pre-wrap;
+ font-size:14px;line-height:1.5;
+}
+.nxtwatt-user{
+ background:#c9f9dd;color:#092016;margin-left:auto;
+ border-bottom-right-radius:4px;
+}
+.nxtwatt-bot{
+ background:#1b3047;color:#f4f8ff;margin-right:auto;
+ border:1px solid #2b4058;border-bottom-left-radius:4px;
+}
+.nxtwatt-error{border-color:#8c4141;color:#ffd1d1}
+#nxtwatt-chat-form{
+ display:flex;gap:8px;padding:11px;
+ background:#101f32;border-top:1px solid var(--line);
+}
+#nxtwatt-chat-input{
+ flex:1;min-width:0;width:100%;background:#091625;color:white;
+ border:1px solid #38536c;border-radius:10px;padding:11px;
+ outline:none;font-size:14px;
+}
+#nxtwatt-chat-input:focus{border-color:var(--green)}
+#nxtwatt-chat-form button{
+ padding:10px 13px;border-radius:10px;
+ background:var(--green);color:#092016;
+}
+#nxtwatt-chat-form button:disabled{opacity:.55;cursor:wait}
+#nxtwatt-chat-status{
+ padding:0 12px 8px;background:#101f32;
+ color:var(--muted);font-size:11px;
+}
+
+@media(max-width:800px){
+ .hero{grid-template-columns:1fr;padding:25px 0}
+ .g4,.g3{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .nav-inner{align-items:flex-start;flex-direction:column}
+ .filters{grid-template-columns:1fr 1fr}
+ .filters .field:first-child{grid-column:1/-1}
+}
+@media(max-width:540px){
+ .wrap{padding:22px 14px 45px}
+ .g2,.g3,.g4,.filters{grid-template-columns:1fr}
+ .filters .field:first-child{grid-column:auto}
+ .hero h1{letter-spacing:-1px}
+ .section-head{align-items:flex-start;flex-direction:column}
+ .links a{padding:6px;font-size:12px}
+ #nxtwatt-chat-button{right:14px;bottom:14px}
+ #nxtwatt-chat-window{right:10px;bottom:76px;width:calc(100vw - 20px)}
+}
+</style>
+</head>
+
+<body>
+<nav class="nav">
+ <div class="nav-inner">
+  <a class="brand" href="#home" style="text-decoration:none;color:inherit">
+   <span class="logo">ϟ</span>NXTWATT
+  </a>
+  <div class="links">
+   <a href="#home">Home</a>
+   <a href="#find">Find chargers</a>
+   <a href="#recommend">Recommendations</a>
+   <a href="#agents">AI agents</a>
+   <a href="#host">Become a host</a>
+   <a href="#impact">Impact</a>
+  </div>
+ </div>
+</nav>
+
+<main class="wrap">
+<section class="hero" id="home">
+ <div>
+  <div class="eyebrow">⚡ Community-powered EV charging</div>
+  <h1>Your neighbourhood.<br><span>Powered together.</span></h1>
+  <p class="lead">Find and book nearby home EV chargers, help charger owners earn from idle charging time, and make electric travel more convenient with NXTWATT.</p>
+  <div class="actions">
+   <button class="primary" onclick="goTo('find')">Find a charger →</button>
+   <button class="secondary" onclick="goTo('host')">Become a host</button>
+  </div>
+  <p class="muted small" style="margin-top:20px">🔒 Community-first · ⚡ Smart matching · 🌱 Greener kilometres</p>
+ </div>
+ <div class="hero-card">
+  <span class="tag">NXTWATT DEMO</span>
+  <div class="hero-icon">🔋</div>
+  <h2 style="font-size:29px;margin:0">Charge closer.<br>Travel further.</h2>
+  <p class="muted">A simple community platform that connects EV drivers with charging options nearby.</p>
+  <div class="grid g2">
+   <div class="card stat"><div class="number">5</div><div class="label">Sample chargers</div></div>
+   <div class="card stat"><div class="number">6</div><div class="label">AI agent roles</div></div>
+  </div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="section-head">
+  <div><div class="eyebrow">At a glance</div><h2>Charging that works for everyone</h2></div>
+  <span class="muted small">Demo statistics</span>
+ </div>
+ <div class="grid g4">
+  <div class="card stat"><div class="number">128</div><div class="label">Community chargers (sample)</div></div>
+  <div class="card stat"><div class="number">4.8★</div><div class="label">Average host rating</div></div>
+  <div class="card stat"><div class="number">2.4 t</div><div class="label">Estimated CO₂ avoided*</div></div>
+  <div class="card stat"><div class="number">₹12</div><div class="label">Example price per kWh</div></div>
+ </div>
+</section>
+
+<section class="section" id="find">
+ <div class="section-head">
+  <div><div class="eyebrow">Discover nearby</div><h2>Find your next charge</h2><p class="muted">Search and filter the example charger network.</p></div>
+ </div>
+ <div class="filters">
+  <div class="field"><label for="search">Search charger or neighbourhood</label><input id="search" placeholder="Try Powai or GreenNest"></div>
+  <div class="field"><label for="priceFilter">Maximum price</label><select id="priceFilter"><option value="100">Any price</option><option value="10">₹10/kWh</option><option value="13">₹13/kWh</option><option value="15">₹15/kWh</option><option value="20">₹20/kWh</option></select></div>
+  <div class="field"><label for="speedFilter">Minimum power</label><select id="speedFilter"><option value="0">Any speed</option><option value="3">3 kW+</option><option value="7">7 kW+</option><option value="11">11 kW+</option><option value="22">22 kW+</option></select></div>
+ </div>
+ <div class="row" style="margin-bottom:15px"><span class="muted small" id="count">5 chargers found</span><button class="secondary" onclick="resetFilters()">Reset filters</button></div>
+ <div class="grid g3" id="chargerList"></div>
+</section>
+
+<section class="section" id="recommend">
+ <div class="section-head">
+  <div><div class="eyebrow">Smart matching</div><h2>Get a recommendation</h2><p class="muted">Choose what matters most and see the best sample match.</p></div>
+ </div>
+ <div class="grid g2">
+  <div class="card">
+   <div class="field"><label for="priority">Your top priority</label><select id="priority"><option value="balanced">Balanced match</option><option value="price">Lowest price</option><option value="speed">Fastest charging</option><option value="green">Solar-friendly</option><option value="distance">Closest charger</option></select></div>
+   <div class="field"><label for="budget">Maximum budget (₹/kWh)</label><input id="budget" type="number" value="16" min="1" max="100"></div>
+   <button class="primary" onclick="recommend()">✨ Recommend a charger</button>
+  </div>
+  <div class="card" id="recommendation"><span class="tag">READY</span><h3>Your match will appear here</h3><p class="muted">This prototype uses transparent, rule-based sorting. Connect an AI model to make it agent-powered.</p></div>
+ </div>
+</section>
+
+<section class="section" id="agents">
+ <div class="section-head">
+  <div><div class="eyebrow">Multi-agent architecture</div><h2>Meet the NXTWATT agents</h2><p class="muted">Run a simulated workflow to see how agents could cooperate.</p></div>
+  <button class="primary" onclick="runAgents()" id="runBtn">▶ Run all agents</button>
+ </div>
+ <div class="grid g3">
+  <div class="card agent"><div class="agent-icon">🔎</div><h3>Discovery Agent</h3><p class="muted small">Finds charger options from the available dataset.</p></div>
+  <div class="card agent"><div class="agent-icon">🧠</div><h3>Matching Agent</h3><p class="muted small">Ranks options by price, distance, speed and user needs.</p></div>
+  <div class="card agent"><div class="agent-icon">🛡️</div><h3>Safety Agent</h3><p class="muted small">Flags missing or inconsistent listing details.</p></div>
+  <div class="card agent"><div class="agent-icon">📅</div><h3>Booking Agent</h3><p class="muted small">Prepares a booking request and slot summary.</p></div>
+  <div class="card agent"><div class="agent-icon">🌱</div><h3>Impact Agent</h3><p class="muted small">Calculates illustrative energy and impact figures.</p></div>
+  <div class="card agent"><div class="agent-icon">🧾</div><h3>Explainer Agent</h3><p class="muted small">Explains why a particular charger was recommended.</p></div>
+ </div>
+ <div class="card section" id="agentLog"><p class="muted">Click “Run all agents” to begin the demo workflow.</p></div>
+ <div class="notice result">Important: these agent steps are simulated in JavaScript. No AI model is connected to this workflow yet.</div>
+</section>
+
+<section class="section" id="host">
+ <div class="section-head">
+  <div><div class="eyebrow">For charger owners</div><h2>List your home charger</h2><p class="muted">Add a local demo listing. It stays in this browser and is not published online.</p></div>
+ </div>
+ <div class="grid g2">
+  <form class="card" id="hostForm">
+   <div class="field"><label for="hostName">Charger listing name</label><input id="hostName" required placeholder="e.g. My Home Charger"></div>
+   <div class="field"><label for="hostArea">Neighbourhood</label><input id="hostArea" required placeholder="e.g. Powai"></div>
+   <div class="grid g2">
+    <div class="field"><label for="hostPower">Power (kW)</label><select id="hostPower"><option>3.3</option><option selected>7.4</option><option>11</option><option>22</option></select></div>
+    <div class="field"><label for="hostPrice">Price (₹/kWh)</label><input id="hostPrice" type="number" value="12" min="1" required></div>
+   </div>
+   <button class="primary">Add demo listing</button>
+  </form>
+  <div class="card">
+   <h3>Your demo listings</h3>
+   <div id="hostListings"><div class="notice">GreenNest Home Charger · Andheri West<br>7.4 kW · ₹12/kWh · Sample listing</div></div>
+   <hr style="border-color:var(--line);margin:20px 0">
+   <h3>Example monthly earnings</h3><div class="price">₹3,240</div>
+   <p class="muted small">Illustrative dashboard metric, not actual earnings.</p>
+   <div class="bar"><span style="width:72%"></span></div>
+  </div>
+ </div>
+</section>
+
+<section class="section" id="impact">
+ <div class="section-head"><div><div class="eyebrow">Community impact</div><h2>Small sessions. Collective impact.</h2></div></div>
+ <div class="grid g3">
+  <div class="card"><h3>⚡ Energy shared</h3><div class="price">8,420 kWh</div><p class="muted small">Illustrative total</p><div class="bar"><span style="width:78%"></span></div></div>
+  <div class="card"><h3>🚗 Charging sessions</h3><div class="price">1,284</div><p class="muted small">Illustrative total</p><div class="bar"><span style="width:64%"></span></div></div>
+  <div class="card"><h3>🌱 CO₂ avoided</h3><div class="price">2.4 tonnes</div><p class="muted small">Unverified estimate; real calculations need clear assumptions.</p><div class="bar"><span style="width:55%"></span></div></div>
+ </div>
+</section>
+
+<section class="section">
+ <div class="card">
+  <div class="eyebrow">How it works</div><h2>Three steps to a charge</h2>
+  <div class="grid g3">
+   <div><h3>01 · Discover</h3><p class="muted">Search nearby options and compare prices.</p></div>
+   <div><h3>02 · Match</h3><p class="muted">Use agent roles to compare and explain choices.</p></div>
+   <div><h3>03 · Book</h3><p class="muted">Select a sample time and review the cost estimate.</p></div>
+  </div>
+  <div class="notice">Prototype only: no real charger availability, accounts, payments, live maps or real-world charging arrangements. Booking records are saved by the local backend.</div>
+ </div>
+</section>
+</main>
+
+<footer class="footer">
+ <div class="footer-inner"><span>© 2026 NXTWATT · Shared charging, smarter living.</span><span>*All data is sample/demo data.</span></div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- CHATBOT HTML: outside all JavaScript blocks -->
+<button id="nxtwatt-chat-button" type="button" aria-controls="nxtwatt-chat-window" aria-expanded="false">
+ ⚡ Chat with NXTWATT AI
+</button>
+
+<section id="nxtwatt-chat-window" role="dialog" aria-label="NXTWATT AI chat">
+ <div id="nxtwatt-chat-header">
+  <div>
+   <strong>⚡ NXTWATT AI</strong>
+   <div class="chat-subtitle">Your EV charging assistant</div>
+  </div>
+  <button id="nxtwatt-chat-close" type="button" aria-label="Close chat">×</button>
+ </div>
+ <div id="nxtwatt-chat-messages" aria-live="polite">
+  <div class="nxtwatt-message nxtwatt-bot">Hi! 👋 I'm NXTWATT AI. Ask me about EV charging, energy use, or affordability.</div>
+ </div>
+ <div id="nxtwatt-chat-status">Powered by your local Gemma model</div>
+ <form id="nxtwatt-chat-form">
+  <input id="nxtwatt-chat-input" type="text" placeholder="Ask me something..." maxlength="2000" aria-label="Your message" autocomplete="off" required>
+  <button id="nxtwatt-chat-send" type="submit">Send</button>
+ </form>
+</section>
+
+<!-- EXISTING WEBSITE JAVASCRIPT -->
+<script>
+const chargers=[
+{id:1,name:"GreenNest Home Charger",host:"Aarav",area:"Andheri West",distance:1.2,kw:7.4,price:12,rating:4.9,connector:"Type 2",available:true,solar:true,slots:["6:00 PM","7:00 PM","8:30 PM"]},
+{id:2,name:"Sunrise Society EV Point",host:"Meera",area:"Powai",distance:3.4,kw:11,price:15,rating:4.8,connector:"Type 2",available:true,solar:false,slots:["5:30 PM","7:30 PM","9:00 PM"]},
+{id:3,name:"ParkView Smart Socket",host:"Rohan",area:"Bandra East",distance:4.1,kw:3.3,price:9,rating:4.6,connector:"Portable",available:false,solar:true,slots:["Tomorrow 8 AM","Tomorrow 10 AM"]},
+{id:4,name:"HarbourCharge Home",host:"Sana",area:"Chembur",distance:5.8,kw:7.4,price:13,rating:4.7,connector:"Type 2",available:true,solar:false,slots:["6:30 PM","8:00 PM"]},
+{id:5,name:"EcoLane Charging",host:"Dev",area:"Goregaon",distance:6.2,kw:22,price:20,rating:4.9,connector:"CCS2",available:true,solar:true,slots:["7:00 PM","8:00 PM","9:30 PM"]}
+];
+
+function goTo(id){
+ document.getElementById(id).scrollIntoView({behavior:"smooth"});
+}
+
+function showToast(msg){
+ const t=document.getElementById("toast");
+ t.textContent=msg;
+ t.classList.add("show");
+ setTimeout(()=>t.classList.remove("show"),2800);
+}
+
+function chargerCard(c){
+ return `<article class="card charger">
+  <div class="row">
+   <span class="tag">${c.available?"● Available":"◷ Limited availability"}</span>
+   <span class="muted small">★ ${c.rating}</span>
+  </div>
+  <h3>${escapeHTML(c.name)}</h3>
+  <div class="muted small">Hosted by ${escapeHTML(c.host)} · ${escapeHTML(c.area)}</div>
+  <div class="details">
+   <span>⚡ ${c.kw} kW</span><span>↔ ${c.distance} km away</span>
+   <span>🔌 ${escapeHTML(c.connector)}</span>
+   ${c.solar?"<span>☀ Solar-friendly</span>":""}
+  </div>
+  <div class="row" style="align-items:end;margin-top:5px">
+   <div class="price">₹${c.price} <span>/ kWh</span></div>
+   <button class="primary" onclick="bookCharger(${c.id})">Book</button>
+  </div>
+ </article>`;
+}
+
+function renderChargers(list=chargers){
+ const el=document.getElementById("chargerList");
+ el.innerHTML=list.length?list.map(chargerCard).join(""):'<div class="empty">No chargers match your filters. Try changing your search.</div>';
+ document.getElementById("count").textContent=list.length+" charger"+(list.length===1?"":"s")+" found";
+}
+
+function applyFilters(){
+ const q=document.getElementById("search").value.toLowerCase();
+ const p=+document.getElementById("priceFilter").value;
+ const k=+document.getElementById("speedFilter").value;
+ renderChargers(chargers.filter(c=>(c.name+" "+c.area+" "+c.host).toLowerCase().includes(q)&&c.price<=p&&c.kw>=k));
+}
+
+function resetFilters(){
+ document.getElementById("search").value="";
+ document.getElementById("priceFilter").value="100";
+ document.getElementById("speedFilter").value="0";
+ applyFilters();
+}
+
+/* BACKEND-CONNECTED BOOKING */
+async function bookCharger(id){
+ const c=chargers.find(x=>x.id===id);
+ if(!c){showToast("Charger not found.");return;}
+ document.getElementById("bookingModal")?.remove();
+
+ const modal=document.createElement("div");
+ modal.id="bookingModal";
+ modal.style.cssText="position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto";
+
+ modal.innerHTML=`
+ <div style="background:#101b2b;color:white;border:1px solid #30445b;border-radius:18px;padding:24px;width:100%;max-width:420px;box-sizing:border-box;max-height:90vh;overflow-y:auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+   <h2 style="margin:0">Book a charging slot</h2>
+   <button id="closeBooking" type="button" aria-label="Close booking" style="background:none;color:white;border:0;font-size:26px">×</button>
+  </div>
+  <p style="color:#aab9cc">${escapeHTML(c.name)}</p>
+  <p id="slotLoading" class="muted small">Loading available slots...</p>
+  <form id="bookingForm">
+   <label for="bookingSlot">Choose an available slot</label>
+   <select id="bookingSlot" required disabled style="display:block;width:100%;padding:12px;margin:8px 0 16px"><option value="">Loading slots...</option></select>
+   <label for="bookingEnergy">Energy needed (kWh)</label>
+   <input id="bookingEnergy" type="number" min="0.1" max="40" step="0.1" value="5" required disabled style="display:block;width:100%;padding:12px;margin:8px 0">
+   <p id="bookingCost">Estimated total: ₹${(5*c.price).toFixed(2)}</p>
+   <p id="bookingError" role="alert" style="color:#ff9999"></p>
+   <button id="confirmBooking" class="primary" type="submit" style="width:100%" disabled>Loading slots...</button>
+   <p style="font-size:12px;color:#aab9cc">Demo only — no real-world charging arrangement or payment.</p>
+  </form>
+  <div id="bookingResult"></div>
+ </div>`;
+
+ document.body.appendChild(modal);
+ const slotInput=modal.querySelector("#bookingSlot");
+ const energyInput=modal.querySelector("#bookingEnergy");
+ const costBox=modal.querySelector("#bookingCost");
+ const errorBox=modal.querySelector("#bookingError");
+ const loadingBox=modal.querySelector("#slotLoading");
+ const confirmButton=modal.querySelector("#confirmBooking");
+ const form=modal.querySelector("#bookingForm");
+
+ modal.querySelector("#closeBooking").onclick=()=>modal.remove();
+ modal.addEventListener("click",e=>{if(e.target===modal)modal.remove();});
+
+ function updateEstimate(){
+  const energy=Number(energyInput.value);
+  costBox.textContent=Number.isFinite(energy)&&energy>0?`Estimated total: ₹${(energy*c.price).toFixed(2)}`:"Enter a valid energy amount.";
+ }
+ energyInput.addEventListener("input",updateEstimate);
+
+ try{
+  const response=await fetch(`/api/bookings/slots/${id}`);
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.detail||"Could not load available slots.");
+  if(!document.body.contains(modal))return;
+
+  const slots=data.available_slots||[];
+  loadingBox.textContent="";
+  if(slots.length===0){
+   slotInput.innerHTML='<option value="">No slots available</option>';
+   errorBox.textContent="All demo slots are booked. Try another charger.";
+   confirmButton.textContent="No slots available";
+   return;
+  }
+
+  slotInput.innerHTML=slots.map(slot=>`<option value="${escapeHTML(slot)}">${escapeHTML(slot)}</option>`).join("");
+  slotInput.disabled=false;
+  energyInput.disabled=false;
+  confirmButton.disabled=false;
+  confirmButton.textContent="Confirm demo booking";
+  updateEstimate();
+ }catch(error){
+  loadingBox.textContent="";
+  errorBox.textContent=error.message;
+  confirmButton.textContent="Unable to load slots";
+  showToast("Couldn't load slots. Check the backend.");
+  return;
+ }
+
+ form.addEventListener("submit",async e=>{
+  e.preventDefault();
+  errorBox.textContent="";
+  const energy=Number(energyInput.value);
+  const slot=slotInput.value;
+
+  if(!slot){errorBox.textContent="Please select an available slot.";return;}
+  if(!Number.isFinite(energy)||energy<=0||energy>40){energyInput.reportValidity();return;}
+
+  confirmButton.disabled=true;
+  slotInput.disabled=true;
+  energyInput.disabled=true;
+  confirmButton.textContent="Saving booking...";
+
+  try{
+   const response=await fetch("/api/bookings",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({charger_id:id,slot:slot,energy_kwh:energy})
+   });
+   const result=await response.json();
+   if(!response.ok)throw new Error(result.detail||"Booking failed. Please try again.");
+   if(!document.body.contains(modal))return;
+
+   modal.querySelector("#bookingForm").remove();
+   modal.querySelector("#slotLoading").remove();
+   modal.querySelector("#bookingResult").innerHTML=`
+    <div class="notice" style="margin-top:14px">
+     <h3 style="color:#8cf0b5">✓ Booking saved!</h3>
+     <p><strong>Booking ID:</strong> ${result.booking_id}</p>
+     <p><strong>Charger:</strong> ${escapeHTML(result.charger_name)}</p>
+     <p><strong>Slot:</strong> ${escapeHTML(result.slot)}</p>
+     <p><strong>Energy:</strong> ${result.energy_kwh} kWh</p>
+     <p><strong>Estimated total:</strong> ₹${result.total_cost}</p>
+     <p class="small">This demo booking is stored in the local database. No payment or real-world charging arrangement has been made.</p>
+     <button id="doneBooking" class="primary" type="button" style="width:100%">Done</button>
+    </div>`;
+   modal.querySelector("#doneBooking").onclick=()=>modal.remove();
+   showToast("Demo booking saved successfully!");
+  }catch(error){
+   errorBox.textContent=error.message;
+   slotInput.disabled=false;
+   energyInput.disabled=false;
+   confirmButton.disabled=false;
+   confirmButton.textContent="Try again";
+   showToast("Booking wasn't saved.");
+  }
+ });
+}
+
+/* BACKEND RECOMMENDATIONS */
+async function recommend(){
+ const priority=document.getElementById("priority").value;
+ const budget=Number(document.getElementById("budget").value)||0;
+ const box=document.getElementById("recommendation");
+ box.innerHTML="<p class='muted'>Finding your best demo match...</p>";
+
+ try{
+  const response=await fetch("/api/recommend",{
+   method:"POST",headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({priority:priority,budget:budget})
+  });
+  const data=await response.json();
+  if(!response.ok)throw new Error(data.detail||"Recommendation request failed.");
+
+  if(!data.success||!data.recommendation){
+   box.innerHTML=`<span class="tag">NO MATCH</span><h3 style="margin-top:12px">No charger found</h3><p class="muted">${escapeHTML(data.message||"Try increasing your budget.")}</p>`;
+   return;
+  }
+
+  const c=data.recommendation;
+  box.innerHTML=`
+   <span class="tag">BEST DEMO MATCH</span>
+   <h3 style="margin-top:12px">${escapeHTML(c.name)}</h3>
+   <p class="muted">${Number(c.distance_km).toFixed(1)} km away</p>
+   <div class="price">₹${c.price_per_kwh} <span>/ kWh</span></div>
+   <p class="muted">Connector: ${escapeHTML((c.connectors||[]).join(", "))} · Estimated cost for 10 kWh: ₹${c.estimated_total_cost}</p>
+   <p class="muted">${escapeHTML(data.message||"Based on the sample charger dataset.")}</p>`;
+ }catch(error){
+  box.innerHTML=`<span class="tag">CONNECTION ERROR</span><h3 style="margin-top:12px">Couldn't get recommendations</h3><p class="muted">${escapeHTML(error.message)}</p><p class="muted">Check that your backend server is running.</p>`;
+ }
+}
+
+/* SIMULATED AGENT WORKFLOW */
+async function runAgents(){
+ const btn=document.getElementById("runBtn");
+ const log=document.getElementById("agentLog");
+ btn.disabled=true;
+ log.innerHTML="";
+
+ const steps=[
+  ["🔎 Discovery Agent","Found 5 sample chargers in the demo dataset."],
+  ["🧠 Matching Agent","Ranked options by price, speed, distance and ratings."],
+  ["🛡️ Safety Agent","Checked sample records for connector and availability details."],
+  ["📅 Booking Agent","Prepared a draft booking workflow; no reservation submitted."],
+  ["🌱 Impact Agent","Prepared illustrative energy and emissions estimates."],
+  ["🧾 Explainer Agent","Best balanced match: GreenNest Home Charger, 1.2 km away, ₹12/kWh."]
+ ];
+
+ for(const [title,desc] of steps){
+  await new Promise(r=>setTimeout(r,350));
+  const d=document.createElement("div");
+  d.className="notice";
+  d.style.margin="9px 0";
+  d.innerHTML="<strong>"+title+"</strong><br>"+desc;
+  log.appendChild(d);
+ }
+ btn.disabled=false;
+ showToast("Demo agent workflow completed");
+}
+
+/* HOST LISTING FORM */
+document.getElementById("search").addEventListener("input",applyFilters);
+document.getElementById("priceFilter").addEventListener("change",applyFilters);
+document.getElementById("speedFilter").addEventListener("change",applyFilters);
+
+document.getElementById("hostForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ const name=document.getElementById("hostName").value.trim();
+ const area=document.getElementById("hostArea").value.trim();
+ const kw=document.getElementById("hostPower").value;
+ const price=Number(document.getElementById("hostPrice").value);
+
+ if(!name||!area||price<=0){showToast("Please complete the form correctly.");return;}
+
+ const d=document.createElement("div");
+ d.className="notice";
+ d.style.marginTop="10px";
+ d.innerHTML="<strong>"+escapeHTML(name)+"</strong> · "+escapeHTML(area)+"<br>"+kw+" kW · ₹"+price+"/kWh · Demo listing";
+ document.getElementById("hostListings").prepend(d);
+ e.target.reset();
+ showToast("Demo listing added in this page");
+});
+
+/* HTML ESCAPING AND INITIAL RENDER */
+function escapeHTML(value){
+ return String(value).replace(/[&<>"']/g,c=>({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
+}
+
+renderChargers();
+</script>
+
+<!-- CHATBOT JAVASCRIPT: separate from the existing website script -->
+<script>
+(() => {
+ const chatButton=document.getElementById("nxtwatt-chat-button");
+ const chatWindow=document.getElementById("nxtwatt-chat-window");
+ const closeButton=document.getElementById("nxtwatt-chat-close");
+ const form=document.getElementById("nxtwatt-chat-form");
+ const input=document.getElementById("nxtwatt-chat-input");
+ const messages=document.getElementById("nxtwatt-chat-messages");
+ const sendButton=document.getElementById("nxtwatt-chat-send");
+ const status=document.getElementById("nxtwatt-chat-status");
+
+ function openChat(){
+  chatWindow.classList.add("open");
+  chatButton.setAttribute("aria-expanded","true");
+  input.focus();
+ }
+
+ function closeChat(){
+  chatWindow.classList.remove("open");
+  chatButton.setAttribute("aria-expanded","false");
+  chatButton.focus();
+ }
+
+ chatButton.addEventListener("click",()=>{
+  if(chatWindow.classList.contains("open"))closeChat();
+  else openChat();
+ });
+
+ closeButton.addEventListener("click",closeChat);
+
+ function addMessage(text,type){
+  const bubble=document.createElement("div");
+  bubble.className="nxtwatt-message "+(type==="user"?"nxtwatt-user":"nxtwatt-bot");
+  bubble.textContent=text;
+  messages.appendChild(bubble);
+  messages.scrollTop=messages.scrollHeight;
+  return bubble;
+ }
+
+ form.addEventListener("submit",async event=>{
+  event.preventDefault();
+  const message=input.value.trim();
+
+  if(!message||sendButton.disabled)return;
+
+  addMessage(message,"user");
+  input.value="";
+  input.disabled=true;
+  sendButton.disabled=true;
+  status.textContent="Gemma is thinking... ⚡";
+
+  const waiting=addMessage("Thinking... ⚡","bot");
+
+  try{
+   const response=await fetch("/api/gemma",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({message})
+   });
+
+   let data;
+   try{
+    data=await response.json();
+   }catch{
+    throw new Error("The server returned an invalid response.");
+   }
+
+   if(!response.ok){
+    throw new Error(typeof data.detail==="string"?data.detail:"AI request failed (HTTP "+response.status+").");
+   }
+
+   waiting.textContent=data.reply||"I didn't receive a reply. Please try again.";
+   status.textContent="Connected to local Gemma AI ✓";
+  }catch(error){
+   waiting.textContent="Sorry, I couldn't get a reply. "+error.message+" Check that the backend and Ollama are running.";
+   waiting.classList.add("nxtwatt-error");
+   status.textContent="Connection problem — check the backend and Ollama.";
+  }finally{
+   input.disabled=false;
+   sendButton.disabled=false;
+   messages.scrollTop=messages.scrollHeight;
+   input.focus();
+  }
+ });
+})();
+</script>
+
+</body>
+</html>
