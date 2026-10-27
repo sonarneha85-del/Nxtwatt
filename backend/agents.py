@@ -1,7 +1,6 @@
 
 from .data import DEMO_CHARGERS
 
-
 def emergency_analyzer(battery, range_km, energy_kwh):
     if battery <= 10 or range_km <= 15:
         urgency = "High"

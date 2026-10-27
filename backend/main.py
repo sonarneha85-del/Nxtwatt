@@ -341,11 +341,18 @@ async def gemma_chat(request: GemmaChatRequest):
             status_code=504,
             detail="Gemma took too long to respond. Please try again.",
         )
+    
     except httpx.RequestError:
-        raise HTTPException(
-            status_code=503,
-            detail="Cannot connect to Ollama. Make sure Ollama is running.",
-        )
+        return {
+            "success": True,
+            "reply": (
+                "NXTWATT AI chat is temporarily unavailable. "
+                "You can still explore chargers and use "
+                "the recommendation features."
+            ),
+            "model": "fallback",
+        }
+
     except httpx.HTTPStatusError:
         raise HTTPException(
             status_code=502,
